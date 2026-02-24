@@ -17,7 +17,7 @@ func main() {
 	currentUser := users[1]
 
 		// Получаем рекомендации
-	recommendations := Recommend(currentUser, videos)
+	recommendations := Recommend(currentUser, users, videos)
 
 	fmt.Printf("Привет, %s! Вот что мы подобрали для тебя:\n", currentUser.Name)
 	for i, v := range recommendations {

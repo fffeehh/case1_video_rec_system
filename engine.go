@@ -2,7 +2,6 @@ package main
 
 import (
 	"sort"
-	"time"
 )
 
 func CalculateSimilarity(u1, u2 User) float64 {
@@ -28,40 +27,33 @@ func CalculateSimilarity(u1, u2 User) float64 {
 }
 
 
-// -----------------------------------------------------------------------
-// дописать дописать дописать дописать дописать дописать дописать дописать
-// -----------------------------------------------------------------------
-func Recommend(user User, allVideos []Video) []Video {
-	favoriteCategory := ""
-	if len(user.ViewedVideoIDs) > 0 {
-		lastVideoID := user.ViewedVideoIDs[len(user.ViewedVideoIDs)-1]
-		for _, v := range allVideos {
-			if v.ID == lastVideoID {
-				favoriteCategory = v.Category
-				break
-			}
-		}
-	}
-
+func Recommend(currentUser User, allUsers []User,allVideos []Video) []Video {
 	type ratedVideo struct {
 		video Video
-		score int
+		score float64
 	}
 
 	var rankedVideos []ratedVideo
 
 	for _, v := range allVideos {
-		if contains(user.ViewedVideoIDs, v.ID) {
+		if contains(currentUser.ViewedVideoIDs, v.ID) {
 			continue
 		}
-		score := 0
-		if v.Category == favoriteCategory {
-			score += 10
+		score := 0.0
+		score += float64(v.Likes) / 100.0
+		
+		for _, otherUser := range allUsers {
+			if otherUser.ID ==  currentUser.ID {
+				continue
+			}
+
+			similarity := CalculateSimilarity(currentUser, otherUser)
+			if contains(otherUser.ViewedVideoIDs, v.ID) {
+				score += similarity * 10.0
+			}
 		}
-		if time.Since(v.CreatedAt).Hours() < 48 {
-			score += 5
-		}
-		score += v.Likes / 10
+
+
 		rankedVideos = append(rankedVideos, ratedVideo{v, score}) 
 	}
 	sort.Slice(rankedVideos, func(i, j int) bool {

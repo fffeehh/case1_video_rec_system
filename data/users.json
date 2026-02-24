@@ -1,12 +1,17 @@
 [
-    {
-        "id": 1,
-        "name": "Коля",
-        "viewed_video_ids": [1, 2]
-    },
-    {
-        "id": 2,
-        "name": "Миша",
-        "viewed_video_ids": [2]
-    }
+  {
+    "id": 1,
+    "name": "Коля",
+    "viewed_video_ids": [1, 2, 3] 
+  },
+  {
+    "id": 2,
+    "name": "Миша",
+    "viewed_video_ids": [1, 2] 
+  },
+  {
+    "id": 3,
+    "name": "Аня",
+    "viewed_video_ids": [4, 5]
+  }
 ]
