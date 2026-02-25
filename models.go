@@ -17,3 +17,7 @@ type User struct {
 	Name           string `json:"name"`
 	ViewedVideoIDs []int  `json:"viewed_video_ids"`
 }
+
+type Recommender interface {
+	Build(user User, allUsers []User, allVideos []Video) []Video
+}
