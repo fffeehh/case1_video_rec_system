@@ -1,8 +1,79 @@
 package main
 
 import (
+	"math/rand"
 	"sort"
 )
+
+type HybridRecommender struct{}
+
+func (h HybridRecommender) Build(user User, allUsers []User, allVideos []Video) []Video {
+	type ratedVideo struct {
+		video Video
+		score float64
+	}
+	var rankedVideos []ratedVideo
+
+	for _, v := range allVideos {
+		if contains(user.ViewedVideoIDs, v.ID) {
+			continue
+		}
+
+		score := float64(v.Likes) / 100.0
+
+		for _, other := range allUsers {
+			if other.ID == user.ID {
+				continue
+			}
+			similarity := CalculateSimilarity(user, other)
+			if contains(other.ViewedVideoIDs, v.ID) {
+				score += similarity * 10.0
+			}
+		}
+		rankedVideos = append(rankedVideos, ratedVideo{v, score})
+	}
+
+	sort.Slice(rankedVideos, func(i, j int) bool {
+		return rankedVideos[i].score > rankedVideos[j].score
+	})
+
+	var result []Video
+	for _, rv := range rankedVideos {
+		result = append(result, rv.video)
+	}
+	return result
+}
+
+type PopularityRecommender struct{}
+
+func (p PopularityRecommender) Build(user User, allUsers []User, allVideos []Video) []Video {
+	var result []Video
+	for _, v := range allVideos {
+		if !contains(user.ViewedVideoIDs, v.ID) {
+			result = append(result, v)
+		}
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Likes > result[j].Likes
+	})
+	return result
+}
+
+type RandomRecommender struct{}
+
+func (r RandomRecommender) Build(user User, allUsers []User, allVideos []Video) []Video {
+	var result []Video
+	for _, v := range allVideos {
+		if !contains(user.ViewedVideoIDs, v.ID) {
+			result = append(result, v)
+		}
+	}
+	rand.Shuffle(len(result), func(i, j int) {
+		result[i], result[j] = result[j], result[i]
+	})
+	return result
+}
+
 
 func CalculateSimilarity(u1, u2 User) float64 {
 	if len(u1.ViewedVideoIDs) == 0 || len(u2.ViewedVideoIDs) == 0 {
@@ -24,47 +95,6 @@ func CalculateSimilarity(u1, u2 User) float64 {
 	unionCount := len(u1.ViewedVideoIDs) + len(u2.ViewedVideoIDs) - commonCount
 	return float64(commonCount) / float64(unionCount)
 
-}
-
-
-func Recommend(currentUser User, allUsers []User,allVideos []Video) []Video {
-	type ratedVideo struct {
-		video Video
-		score float64
-	}
-
-	var rankedVideos []ratedVideo
-
-	for _, v := range allVideos {
-		if contains(currentUser.ViewedVideoIDs, v.ID) {
-			continue
-		}
-		score := 0.0
-		score += float64(v.Likes) / 100.0
-		
-		for _, otherUser := range allUsers {
-			if otherUser.ID ==  currentUser.ID {
-				continue
-			}
-
-			similarity := CalculateSimilarity(currentUser, otherUser)
-			if contains(otherUser.ViewedVideoIDs, v.ID) {
-				score += similarity * 10.0
-			}
-		}
-
-
-		rankedVideos = append(rankedVideos, ratedVideo{v, score}) 
-	}
-	sort.Slice(rankedVideos, func(i, j int) bool {
-		return rankedVideos[i].score > rankedVideos[j].score
-	})
-	var result []Video
-	for _, v := range rankedVideos {
-		result = append(result, v.video)
-	}
-
-	return result
 }
 
 func contains(slice []int, id int) bool {

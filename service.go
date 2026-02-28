@@ -3,14 +3,16 @@ package main
 import "fmt"
 
 type RecService struct {
-	Videos []Video
-	Users []User
+	videos []Video
+	users []User
+	engine Recommender
 }
 
-func NewRecService(v []Video, u []User) *RecService {
+func NewRecService(v []Video, u []User, e Recommender) *RecService {
 	return &RecService{
-		Videos: v,
-		Users: u,
+		videos: v,
+		users: u,
+		engine: e,
 	}
 }
 
@@ -19,7 +21,7 @@ func(s *RecService) GetRecommendationsForUser(userName string) ([]Video, error) 
 	var targetUser User
 	found := false
 
-	for _, u := range s.Users {
+	for _, u := range s.users {
 		if u.Name == userName {
 			targetUser = u
 			found = true
@@ -30,6 +32,5 @@ func(s *RecService) GetRecommendationsForUser(userName string) ([]Video, error) 
 	if !found {
 		return nil, fmt.Errorf("user not found")
 	}
-
-	return Recommend(targetUser, s.Users, s.Videos), nil
+		return s.engine.Build(targetUser, s.users, s.videos), nil
 }

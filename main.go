@@ -14,9 +14,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
+
 	// Инициализация сервиса (слой Logic)
-	service := NewRecService(videos, users)
+	activeAlgo := HybridRecommender{}
+	service := NewRecService(videos, users, activeAlgo)
 	
 	userName := "Миша"
 	recs, err := service.GetRecommendationsForUser(userName)
@@ -33,6 +35,7 @@ func main() {
 		fmt.Printf("- %s [%s]\n", v.Title, v.Category)
 	}
 	
+
 	// Оценка качества (метрики)
 	hiddenHistory := []int{3}
 	precision := CalculatePrecision(recs, hiddenHistory)
